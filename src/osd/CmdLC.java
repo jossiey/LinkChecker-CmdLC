@@ -29,32 +29,31 @@ import java.util.regex.Pattern;
 		mixinStandardHelpOptions = true, 
 		version = "@|bold,underline command lc -- CmdLC 0.1|@",
 		headerHeading = "%n@|bold,underline Usage|@:%n%n",
-	    synopsisHeading = "%n",
+		synopsisHeading = "%n",
 		descriptionHeading = "%n@|bold,underline Description|@:%n%n",
 		parameterListHeading = "%n@|bold,underline Parameters|@:%n",
 		optionListHeading = "%n@|bold,underline Options|@:%n",
 		header = "Uses command lc to check broken URLs",
 		description = "Finding and reporting dead links in a file along with " + 
-		              "a list showing good URL with green, bad URL with red," +
-				      " unknown URL with yellow"
+				"a list showing good URL with green, bad URL with red," +
+				" redirect URL with yellow, others with unknown"
 		)
 
 public class CmdLC implements Callable<Integer> { 
-	
+
 	@Parameters(index = "0", description = "The file which contains URLs need to be checked")
 	private String file;
-	
 
 	public static void main(String[] args) {
-		
+
 		int exitCode = new CommandLine(new CmdLC()).execute(args);
 		System.exit(exitCode);
-	
-
 	}
 
 
+	//to save the url from the file, avoiding duplication
 	private HashSet<String> links = new HashSet<String> ();
+
 
 	//extract url from a file
 	public void extractURL(String file) throws FileNotFoundException, IOException{
@@ -69,24 +68,20 @@ public class CmdLC implements Callable<Integer> {
 
 			Matcher matcher = pattern.matcher(content);
 
-
 			while(matcher.find()) {
 				links.add(matcher.group());
 			}
 
-
 		}catch(FileNotFoundException ex) {					
-			System.out.println(ex + "\n");
+			//System.out.println(ex + "\n");
 		}catch(IOException ex) {
-			System.out.println(ex);
+			//System.out.println(ex);
 		}
-
 	}
 
 
-	int counter = 0;
-	int total = 0;
-	
+	int counter = 0, total = 0;
+
 	//check url is valid or invalid
 	public void urlTest(String link) throws MalformedURLException {
 
@@ -102,55 +97,47 @@ public class CmdLC implements Callable<Integer> {
 
 			if(responseCode == 200) {   //HTTP_OK				
 				counter++;  			
-				
+
 				String str = "@|green " + "[" + responseCode + "]" + " GOOD     " + link + " |@";		
 				System.out.println(Ansi.AUTO.string(str));				
-				
+
 			}
 
-//			else if(responseCode >= 300 || responseCode < 400)	 {   //301 Moved Permanently , 410 Gone										
-//					
-//					String str = "@|yellow " + "[" + responseCode + "]" + " UNKNOWN  " + link + " |@";						
-//					System.out.println(Ansi.AUTO.string(str));				
-//					
-//				}
-			
-			else if(responseCode == 404 || responseCode == 400 ) {   //400									
-				
-				String str = "@|red " + "[" + responseCode + "]" + " BAD      "  + link + " |@";						
-				
-				System.out.println(Ansi.AUTO.string(str));				
-				
+			else if(responseCode >= 300 || responseCode < 400)	 {   //301 Moved Permanently 									
+
+				String str = "@|yellow " + "[" + responseCode + "]" + " REDIRECT"
+						+ " " + link + " |@";						
+				System.out.println(Ansi.AUTO.string(str));		
 			}
-			
-			else {
-				String str = "@|237 " + "[" + responseCode + "]" + " UNKNOWN  " +  link + " |@";						
+
+			else if(responseCode == 404 || responseCode == 400 ) {   //400 File not found									
+
+				String str = "@|red " + "[" + responseCode + "]" + " BAD      "  + link + " |@";						
+				System.out.println(Ansi.AUTO.string(str));			
+			}
+
+			else {      //410 Gone	
+				String str = "@|237 " + "[" + responseCode + "]" + " UNKNOWN  " +  link + " |@";			
 				System.out.println(Ansi.AUTO.string(str));	
 			}
 
 		}catch(MalformedURLException ex) {
-			
-			String str = "@|yellow " + " UNKNOWN  " +  link + " |@";						
+
+			String str = "@|237 " + "      UNKNOWN  " +  link + " |@";						
 			System.out.println(Ansi.AUTO.string(str));				
-			
-			System.out.println(ex);
 
 		}catch(IOException ex) {
-			
-			String str = "@|237 " + " UNKNOWN  " + link + " |@";						
+
+			String str = "@|237 " + "      UNKNOWN  " + link + " |@";						
 			System.out.println(Ansi.AUTO.string(str));				
-			
-			System.out.println(ex);
 		}
-
-
 	}
+
 
 	@Override
 	public Integer call() throws FileNotFoundException, IOException {
 
 		try {
-
 			//extract url from a file
 			extractURL(file);
 
@@ -158,11 +145,10 @@ public class CmdLC implements Callable<Integer> {
 			for(String url: links) {
 				urlTest(url);
 			}
-
 		}catch(FileNotFoundException ex) {
-			System.out.println(ex);
+			// System.out.println(ex);
 		}catch(IOException ex) {
-			System.out.println(ex);
+			// System.out.println(ex);
 		}
 
 		//summary
