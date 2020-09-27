@@ -1,8 +1,8 @@
 # LinkChecker-CmdLC
-##### This repository hosts a command-line tool finding and checking the broken URLs in a file.
+##### This repository hosts a command-line tool finding and checking the broken URLs in multiple files.
 
 ## Features
-* Finding all URLs from the given file base on the protocol of "http://" and "https://"
+* Finding all URLs from one or multiple given files base on the protocol of "http://" and "https://"
 * Removing duplicated URLs from the given file
 * Returning the URLs with different response code: 200 - Good, 400/404 - Bad, others - Unknown
 * Coloring the output base on response code (Unix-based OS): Good - Green, Bad - Red, Unknown -  grey
