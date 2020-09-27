@@ -1,5 +1,5 @@
 # LinkChecker-CmdLC
-##### This reposity hosts a command-line tool finding and checking the broken URLs in a file.
+##### This repository hosts a command-line tool finding and checking the broken URLs in a file.
 
 ## Features
 * Finding all URLs from the given file base on the protocol of "http://" and "https://"
