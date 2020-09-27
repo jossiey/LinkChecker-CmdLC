@@ -15,9 +15,9 @@ import java.net.MalformedURLException;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
+import java.util.ArrayList;
 import java.util.HashSet;
-
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import java.util.regex.Matcher;
@@ -41,8 +41,9 @@ import java.util.regex.Pattern;
 
 public class CmdLC implements Callable<Integer> { 
 
-	@Parameters(index = "0", description = "The file which contains URLs need to be checked")
-	private String file;
+//	@Parameters(index = "0", description = "The file which contains URLs need to be checked")
+	@Parameters( /* file name */ description = "The files which contains URLs need to be checked")
+	private ArrayList<String> files;
 
 	public static void main(String[] args) {
 
@@ -138,13 +139,24 @@ public class CmdLC implements Callable<Integer> {
 	public Integer call() throws FileNotFoundException, IOException {
 
 		try {
+			
+			for(String file : files) {
+				
+			System.out.println("\nFinding and checking file \"" + file + "\" now ...");	
 			//extract url from a file
 			extractURL(file);
-
+			
 			//looping to test each url 
 			for(String url: links) {
 				urlTest(url);
 			}
+			
+			//summary
+			System.out.printf("Total valid URLs are: %d\nTotal checked URLs are: %d\n", counter, total);
+			counter = 0; 
+			total =0;
+			}
+		
 		}catch(FileNotFoundException ex) {
 			// System.out.println(ex);
 		}catch(IOException ex) {
@@ -152,7 +164,7 @@ public class CmdLC implements Callable<Integer> {
 		}
 
 		//summary
-		System.out.printf("\nTotal valid URLs are: %d\nTotal checked URLs are: %d\n", counter, total);
+		//System.out.printf("Total valid URLs are: %d\nTotal checked URLs are: %d\n", counter, total);
 
 		return 0;
 	}
