@@ -16,11 +16,11 @@ Download the CmdLC.jar file inside release0.1 folder
  1. Make an alias first
  > `alias lc='java -cp "picocli-4.5.1.jar:CmdLC.jar" osd.CmdLC'`
  2. Use **_lc_** command directly
- > `lc [-hV] <file>`
+ > `lc [-hV] <file1> <file2> ...`
  
 #### On Windows operating systems
    Run .jar directly
- > `java -jar CmdLC.jar <file>`
+ > `java -jar CmdLC.jar <file1> <file2> ...`
  
 ## Available Options
 | Options | Description |
