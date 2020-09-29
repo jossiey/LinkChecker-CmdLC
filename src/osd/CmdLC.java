@@ -34,14 +34,13 @@ import java.util.regex.Pattern;
 		parameterListHeading = "%n@|bold,underline Parameters|@:%n",
 		optionListHeading = "%n@|bold,underline Options|@:%n",
 		header = "Uses command lc to check broken URLs",
-		description = "Finding and reporting dead links in a file along with " + 
-				"a list showing good URL with green, bad URL with red," +
-				" redirect URL with yellow, others with unknown"
+		description = "Finding and reporting dead links in one file or multiple files " + 
+				"along with a list showing good URL with green, " +
+				"bad URL with red, redirect URL with yellow, others with unknown"
 		)
 
 public class CmdLC implements Callable<Integer> { 
 
-//	@Parameters(index = "0", description = "The file which contains URLs need to be checked")
 	@Parameters( /* file name */ description = "The files which contains URLs need to be checked")
 	private ArrayList<String> files;
 
@@ -61,12 +60,11 @@ public class CmdLC implements Callable<Integer> {
 
 		try{
 
-			String content = new String(Files.readAllBytes(Paths.get(file)));	      
-
+			String content = new String(Files.readAllBytes(Paths.get(file)));	   
+			
+            //regular expression
 			String urlRegex = "(https?)://[-a-zA-Z0-9+&@#/%?=~_|,!:.;]*[-a-zA-Z0-9+@#/%=&_|]";
-
 			Pattern pattern = Pattern.compile(urlRegex);
-
 			Matcher matcher = pattern.matcher(content);
 
 			while(matcher.find()) {
@@ -90,13 +88,15 @@ public class CmdLC implements Callable<Integer> {
 			URL url = new URL(link); 
 			total++;		
 
-			//	url.openStream().close();      // == openConnection().getInputStream()  read content of the website
-
+		    //URL connect and response
 			HttpURLConnection huc = (HttpURLConnection) url.openConnection();
-
 			int responseCode = huc.getResponseCode();
+	
+			//set redirect
+			huc.setInstanceFollowRedirects(true);
 
-			if(responseCode == 200) {   //HTTP_OK				
+			//set URL status
+			if(responseCode == HttpURLConnection.HTTP_OK) {   //200				
 				counter++;  			
 
 				String str = "@|green " + "[" + responseCode + "]" + " GOOD     " + link + " |@";		
@@ -104,14 +104,13 @@ public class CmdLC implements Callable<Integer> {
 
 			}
 
-			else if(responseCode >= 300 || responseCode < 400)	 {   //301 Moved Permanently 									
+			else if(responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == 307 || responseCode == 308)	 {   //301 Moved Permanently 									
 
-				String str = "@|yellow " + "[" + responseCode + "]" + " REDIRECT"
-						+ " " + link + " |@";						
+				String str = "@|yellow " + "[" + responseCode + "]" + " REDIRECT " + link + " |@";						
 				System.out.println(Ansi.AUTO.string(str));		
 			}
 
-			else if(responseCode == 404 || responseCode == 400 ) {   //400 File not found									
+			else if(responseCode == HttpURLConnection.HTTP_NOT_FOUND || responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {   //400 HTTP_BAD_REQUEST , 404 HTTP_NOT_FOUND								
 
 				String str = "@|red " + "[" + responseCode + "]" + " BAD      "  + link + " |@";						
 				System.out.println(Ansi.AUTO.string(str));			
@@ -161,10 +160,7 @@ public class CmdLC implements Callable<Integer> {
 			// System.out.println(ex);
 		}catch(IOException ex) {
 			// System.out.println(ex);
-		}
-
-		//summary
-		//System.out.printf("Total valid URLs are: %d\nTotal checked URLs are: %d\n", counter, total);
+		}	
 
 		return 0;
 	}
