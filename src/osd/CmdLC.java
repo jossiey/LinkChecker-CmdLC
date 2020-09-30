@@ -108,7 +108,12 @@ public class CmdLC implements Callable<Integer> {
 
 				String str = "@|yellow " + "[" + responseCode + "]" + " REDIRECT"
 						+ " " + link + " |@";						
-				System.out.println(Ansi.AUTO.string(str));		
+				System.out.println(Ansi.AUTO.string(str));	
+				
+				// issue-6 redirection by Eunbee Kim
+				String redirectURL = huc.getHeaderField("Location");
+				urlTest(redirectURL);
+				
 			}
 
 			else if(responseCode == 404 || responseCode == 400 ) {   //400 File not found									
