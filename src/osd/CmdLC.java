@@ -13,8 +13,14 @@ import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 
+
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.FileVisitResult;
+import java.nio.file.attribute.BasicFileAttributes;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -42,7 +48,8 @@ import java.util.regex.Pattern;
 public class CmdLC implements Callable<Integer> { 
 
 	@Parameters( /* file name */ description = "The files which contains URLs need to be checked")
-	private ArrayList<String> files;
+	private ArrayList<String> args;
+	
 
 	public static void main(String[] args) {
 
@@ -50,19 +57,38 @@ public class CmdLC implements Callable<Integer> {
 		System.exit(exitCode);
 	}
 
+	
+	@Override
+	public Integer call() throws FileNotFoundException, IOException {
 
-	//to save the url from the file, avoiding duplication
-	private HashSet<String> links = new HashSet<String> ();
+		try {
+			for(String arg : args) {
+				
+				//invoke visitFileRecursive method
+				visitFileRecursive(arg);
+			}
+
+		}catch(FileNotFoundException ex) {
+			// System.out.println(ex);
+		}catch(IOException ex) {
+			// System.out.println(ex);
+		}
+
+		return 0;
+	}
 
 
-	//extract url from a file
-	public void extractURL(String file) throws FileNotFoundException, IOException{
+	//extract urls from a file
+	public HashSet<String> extractURL(String file) throws FileNotFoundException, IOException{
+		
+		//save the urls from the file, avoiding duplication
+		HashSet<String> links = new HashSet<String> ();
 
 		try{
 
-			String content = new String(Files.readAllBytes(Paths.get(file)));	   
-			
-            //regular expression
+			String content = new String(Files.readAllBytes(Paths.get(file)));	  
+
+			//regular expression
 			String urlRegex = "(https?)://[-a-zA-Z0-9+&@#/%?=~_|,!:.;]*[-a-zA-Z0-9+@#/%=&_|]";
 			Pattern pattern = Pattern.compile(urlRegex);
 			Matcher matcher = pattern.matcher(content);
@@ -76,7 +102,9 @@ public class CmdLC implements Callable<Integer> {
 		}catch(IOException ex) {
 			//System.out.println(ex);
 		}
+		return links;
 	}
+
 
 
 	int counter = 0, total = 0;
@@ -88,10 +116,13 @@ public class CmdLC implements Callable<Integer> {
 			URL url = new URL(link); 
 			total++;		
 
-		    //URL connect and response
+			//URL connect and response
 			HttpURLConnection huc = (HttpURLConnection) url.openConnection();
 			int responseCode = huc.getResponseCode();
-	
+
+
+			//	System.out.println(huc.getHeaderFields());
+
 			//set redirect
 			huc.setInstanceFollowRedirects(true);
 
@@ -134,35 +165,44 @@ public class CmdLC implements Callable<Integer> {
 	}
 
 
-	@Override
-	public Integer call() throws FileNotFoundException, IOException {
+	//recursively visit the directory/files and subfiles
+	public void visitFileRecursive(String path) throws IOException {
 
-		try {
-			
-			for(String file : files) {
-				
-			System.out.println("\nFinding and checking file \"" + file + "\" now ...");	
-			//extract url from a file
-			extractURL(file);
-			
-			//looping to test each url 
-			for(String url: links) {
-				urlTest(url);
-			}
-			
-			//summary
-			System.out.printf("Total valid URLs are: %d\nTotal checked URLs are: %d\n", counter, total);
-			counter = 0; 
-			total =0;
-			}
-		
-		}catch(FileNotFoundException ex) {
-			// System.out.println(ex);
-		}catch(IOException ex) {
-			// System.out.println(ex);
-		}	
+		Files.walkFileTree(Paths.get(path), new SimpleFileVisitor<Path>() {
 
-		return 0;
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				//files.add(file.toString());
+
+				System.out.println("\nFinding and checking file \"" + file.toString() + "\" now ...");	
+				//extract url from a file
+				HashSet<String> links = extractURL(file.toString());
+
+				//looping to test each url 
+				for(String url: links) {
+					urlTest(url);
+				}
+
+				//summary
+				System.out.printf("Total valid URLs are: %d\nTotal checked URLs are: %d\n", counter, total);
+				counter = 0; 
+				total =0;
+
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+				System.out.println("All files in the directory \"" + dir.toString() + "\" are checked.");
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException{
+				System.err.println(exc);
+				return FileVisitResult.CONTINUE;
+			}
+		});
 	}
 
 
