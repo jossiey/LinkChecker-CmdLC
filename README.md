@@ -3,11 +3,12 @@
 
 ## Features
 * Finding all URLs from one or multiple given files base on the protocol of "http://" and "https://"
-* Removing duplicated URLs from the given file
+* Removing duplicated URLs from the given files
 * Returning the URLs with different response code: 200 - Good, 400/404 - Bad, others - Unknown
 * Coloring the output base on response code (Unix-based OS): Good - Green, Bad - Red, Unknown -  grey
 * Redirecting to new location when response code is 301, 307, 308
 * Providing help and version utility on Picocli open source tool
+* Allowing to pass directory paths and recursively process all children under that directory
 
 ## How it works
 Download the CmdLC.jar file inside release0.1 folder
