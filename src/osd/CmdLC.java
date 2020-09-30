@@ -138,7 +138,11 @@ public class CmdLC implements Callable<Integer> {
 			else if(responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == 307 || responseCode == 308)	 {   //301 Moved Permanently 									
 
 				String str = "@|yellow " + "[" + responseCode + "]" + " REDIRECT " + link + " |@";						
-				System.out.println(Ansi.AUTO.string(str));		
+				System.out.println(Ansi.AUTO.string(str));	
+				
+				// issue-6 redirection by Eunbee Kim
+				String redirectURL = huc.getHeaderField("Location");
+				urlTest(redirectURL);				
 			}
 
 			else if(responseCode == HttpURLConnection.HTTP_NOT_FOUND || responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {   //400 HTTP_BAD_REQUEST , 404 HTTP_NOT_FOUND								
