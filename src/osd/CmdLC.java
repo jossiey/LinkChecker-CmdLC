@@ -106,9 +106,13 @@ public class CmdLC implements Callable<Integer> {
 
 			else if(responseCode >= 300 || responseCode < 400)	 {   //301 Moved Permanently 									
 
-				String str = "@|yellow " + "[" + responseCode + "]" + " REDIRECT"
-						+ " " + link + " |@";						
-				System.out.println(Ansi.AUTO.string(str));		
+				String str = "@|yellow " + "[" + responseCode + "]" + " REDIRECT " + link + " |@";						
+				System.out.println(Ansi.AUTO.string(str));
+				
+				// issue-6 redirection by Eunbee Kim
+				String redirectURL = huc.getHeaderField("Location");
+				urlTest(redirectURL);
+				
 			}
 
 			else if(responseCode == 404 || responseCode == 400 ) {   //400 File not found									
