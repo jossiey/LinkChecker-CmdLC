@@ -53,8 +53,16 @@ public class CmdLC implements Callable<Integer> {
 	
 	@Parameters( /* file name */ description = "The files which contains URLs need to be checked")
 	private ArrayList<String> args;
+
 	
 	private boolean badLink = false;
+
+
+
+	@Option(names = { "-j", "--json", "/j", "\\j" }, paramLabel = "JSON", description = "output JSON format")
+	boolean JSON;
+
+
 
 	public static void main(String[] args) {
 
@@ -63,17 +71,52 @@ public class CmdLC implements Callable<Integer> {
 		System.exit(exitCode);
 	}
 
-	
+
 	@Override
 	public Integer call() throws FileNotFoundException, IOException {
 		
-		 try {
+
+
+		ArrayList<String> files = new ArrayList<String>();
+
+		try {
+>>>>>>> issue-12
 			for(String arg : args) {
-				
+
 				//invoke visitFileRecursive method
-				visitFileRecursive(arg);
+				files.addAll(visitFileRecursive(arg));
 			}
 
+			for(String file: files) {
+
+				
+				System.out.println("\nFinding and checking file \"" + file.toString() + "\" now ...");	
+				
+				//extract url from a file
+				HashSet<String> links = extractURL(file.toString());		
+				
+				if(JSON) {
+					System.out.println("JSON output format");
+					System.out.println("[ ");
+					
+					//looping to test each url 
+					for(String url:links) {
+						urlTest(url);
+					}
+					
+					System.out.println(" ]");
+				}
+				
+				else {
+					//looping to test each url 
+					for(String url: links) {
+						urlTest(url);
+					}
+				}
+				
+			}
+				
+				
 		}catch(FileNotFoundException ex) {
 			
 		}catch(IOException ex) {
@@ -88,7 +131,7 @@ public class CmdLC implements Callable<Integer> {
 
 	//extract urls from a file
 	public HashSet<String> extractURL(String file) throws FileNotFoundException, IOException{
-		
+
 		//save the urls from the file, avoiding duplication
 		HashSet<String> links = new HashSet<String> ();
 
@@ -106,9 +149,9 @@ public class CmdLC implements Callable<Integer> {
 			}
 
 		}catch(FileNotFoundException ex) {					
-			//System.out.println(ex + "\n");
+			
 		}catch(IOException ex) {
-			//System.out.println(ex);
+			
 		}
 		return links;
 	}
@@ -131,41 +174,67 @@ public class CmdLC implements Callable<Integer> {
 			//	System.out.println(huc.getHeaderFields());
 
 			//set redirect
-			huc.setInstanceFollowRedirects(true);
+			huc.setInstanceFollowRedirects(true);	
+			
 
 			//set URL status
-			if(responseCode == HttpURLConnection.HTTP_OK) {   //200								
+
+			if(responseCode == HttpURLConnection.HTTP_OK) {   //200				
+		 			                
+				if(JSON) 
+				   System.out.println("{url: '" + link + "' , status: '" + responseCode + "' }," );
+				else {
 
 				String str = "@|green " + "[" + responseCode + "]" + " GOOD     " + link + " |@";		
-				System.out.println(Ansi.AUTO.string(str));				
+				System.out.println(Ansi.AUTO.string(str));		
+				}
 
 			}
 
 			else if(responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == 307 || responseCode == 308)	 {   //301 Moved Permanently 									
 
-				String str = "@|yellow " + "[" + responseCode + "]" + " REDIRECT " + link + " |@";						
-				System.out.println(Ansi.AUTO.string(str));	
-				
 				// issue-6 redirection by Eunbee Kim
 				String redirectURL = huc.getHeaderField("Location");
-				urlTest(redirectURL);				
+				urlTest(redirectURL);	
+				
+				if(JSON) 
+					   System.out.println("{url: '" + link + "' , status: '" + responseCode + "' }," );
+				else {
+				
+				String str = "@|yellow " + "[" + responseCode + "]" + " REDIRECT " + link + " |@";						
+				System.out.println(Ansi.AUTO.string(str));	
+				}
+
+							
 			}
 
 			else if(responseCode == HttpURLConnection.HTTP_NOT_FOUND || responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {   //400 HTTP_BAD_REQUEST , 404 HTTP_NOT_FOUND								
 
+				if(JSON) 
+					   System.out.println("{url: '" + link + "' , status: '" + responseCode + "' }," );
+				else {
+				
 				String str = "@|red " + "[" + responseCode + "]" + " BAD      "  + link + " |@";						
-				System.out.println(Ansi.AUTO.string(str));					
-				badLink = true;
+
+				System.out.println(Ansi.AUTO.string(str));								
+				}
+                              badLink = true;
 			}
 
 			else {      //410 Gone	
+				if(JSON) 
+					   System.out.println("{url: '" + link + "' , status: '" + responseCode + "' }," );
+				else {
+				
 				String str = "@|237 " + "[" + responseCode + "]" + " UNKNOWN  " +  link + " |@";			
 				System.out.println(Ansi.AUTO.string(str));	
-				badLink = true;
+
+				}
+                               badLink = true;
 			}
 
 		}catch(MalformedURLException ex) {
-
+			
 			String str = "@|237 " + "      UNKNOWN  " +  link + " |@";						
 			System.out.println(Ansi.AUTO.string(str));	
 			badLink = true;
@@ -180,29 +249,21 @@ public class CmdLC implements Callable<Integer> {
 
 
 	//recursively visit the directory/files and subfiles
-	public void visitFileRecursive(String path) throws IOException {
+	public ArrayList<String> visitFileRecursive(String path) throws IOException {
 
+		ArrayList<String> files = new ArrayList<String>();
+		
 		Files.walkFileTree(Paths.get(path), new SimpleFileVisitor<Path>() {
 
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				//files.add(file.toString());
 
-				System.out.println("\nFinding and checking file \"" + file.toString() + "\" now ...");	
-				//extract url from a file
-				HashSet<String> links = extractURL(file.toString());
-
-				//looping to test each url 
-				for(String url: links) {
-					urlTest(url);
-				}				
-
+				files.add(file.toString());		
 				return FileVisitResult.CONTINUE;
 			}
 
 			@Override
 			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-				System.out.println("All files in the directory \"" + dir.toString() + "\" are checked.");
 				return FileVisitResult.CONTINUE;
 			}
 
@@ -212,6 +273,8 @@ public class CmdLC implements Callable<Integer> {
 				return FileVisitResult.CONTINUE;
 			}
 		});
+		
+		return files;
 	}
 
 
