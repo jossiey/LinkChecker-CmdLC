@@ -30,6 +30,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
+
+
+
+
 @Command(
 		name = "lc",
 		mixinStandardHelpOptions = true, 
@@ -46,22 +50,24 @@ import java.util.regex.Pattern;
 		)
 
 public class CmdLC implements Callable<Integer> { 
-
+	
 	@Parameters( /* file name */ description = "The files which contains URLs need to be checked")
 	private ArrayList<String> args;
 	
+	private boolean badLink = false;
 
 	public static void main(String[] args) {
 
 		int exitCode = new CommandLine(new CmdLC()).execute(args);
+		System.out.println("\nProgram exited with code " + exitCode +".");
 		System.exit(exitCode);
 	}
 
 	
 	@Override
 	public Integer call() throws FileNotFoundException, IOException {
-
-		try {
+		
+		 try {
 			for(String arg : args) {
 				
 				//invoke visitFileRecursive method
@@ -69,12 +75,14 @@ public class CmdLC implements Callable<Integer> {
 			}
 
 		}catch(FileNotFoundException ex) {
-			// System.out.println(ex);
+			
 		}catch(IOException ex) {
-			// System.out.println(ex);
+			
 		}
 
-		return 0;
+        int exit_code = badLink ? 1 : 0;
+        
+		return exit_code;
 	}
 
 
@@ -107,14 +115,13 @@ public class CmdLC implements Callable<Integer> {
 
 
 
-	int counter = 0, total = 0;
+	
 
 	//check url is valid or invalid
 	public void urlTest(String link) throws MalformedURLException {
 
 		try {
-			URL url = new URL(link); 
-			total++;		
+			URL url = new URL(link); 		
 
 			//URL connect and response
 			HttpURLConnection huc = (HttpURLConnection) url.openConnection();
@@ -127,8 +134,7 @@ public class CmdLC implements Callable<Integer> {
 			huc.setInstanceFollowRedirects(true);
 
 			//set URL status
-			if(responseCode == HttpURLConnection.HTTP_OK) {   //200				
-				counter++;  			
+			if(responseCode == HttpURLConnection.HTTP_OK) {   //200								
 
 				String str = "@|green " + "[" + responseCode + "]" + " GOOD     " + link + " |@";		
 				System.out.println(Ansi.AUTO.string(str));				
@@ -148,23 +154,27 @@ public class CmdLC implements Callable<Integer> {
 			else if(responseCode == HttpURLConnection.HTTP_NOT_FOUND || responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {   //400 HTTP_BAD_REQUEST , 404 HTTP_NOT_FOUND								
 
 				String str = "@|red " + "[" + responseCode + "]" + " BAD      "  + link + " |@";						
-				System.out.println(Ansi.AUTO.string(str));			
+				System.out.println(Ansi.AUTO.string(str));					
+				badLink = true;
 			}
 
 			else {      //410 Gone	
 				String str = "@|237 " + "[" + responseCode + "]" + " UNKNOWN  " +  link + " |@";			
 				System.out.println(Ansi.AUTO.string(str));	
+				badLink = true;
 			}
 
 		}catch(MalformedURLException ex) {
 
 			String str = "@|237 " + "      UNKNOWN  " +  link + " |@";						
-			System.out.println(Ansi.AUTO.string(str));				
+			System.out.println(Ansi.AUTO.string(str));	
+			badLink = true;
 
 		}catch(IOException ex) {
 
 			String str = "@|237 " + "      UNKNOWN  " + link + " |@";						
-			System.out.println(Ansi.AUTO.string(str));				
+			System.out.println(Ansi.AUTO.string(str));		
+			badLink = true;
 		}
 	}
 
@@ -185,12 +195,7 @@ public class CmdLC implements Callable<Integer> {
 				//looping to test each url 
 				for(String url: links) {
 					urlTest(url);
-				}
-
-				//summary
-				System.out.printf("Total valid URLs are: %d\nTotal checked URLs are: %d\n", counter, total);
-				counter = 0; 
-				total =0;
+				}				
 
 				return FileVisitResult.CONTINUE;
 			}
