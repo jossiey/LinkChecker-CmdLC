@@ -57,7 +57,7 @@ public class CmdLC implements Callable<Integer> {
 	
 	private boolean badLink = false;
 
-
+ 
 
 	@Option(names = { "-j", "--json", "/j", "\\j" }, paramLabel = "JSON", description = "output JSON format")
 	boolean JSON;
@@ -80,7 +80,7 @@ public class CmdLC implements Callable<Integer> {
 		ArrayList<String> files = new ArrayList<String>();
 
 		try {
->>>>>>> issue-12
+
 			for(String arg : args) {
 
 				//invoke visitFileRecursive method
