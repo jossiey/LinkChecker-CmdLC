@@ -55,9 +55,7 @@ public class CmdLC implements Callable<Integer> {
 	private ArrayList<String> args;
 
 	
-	private boolean badLink = false;
-
- 
+	
 
 	@Option(names = { "-j", "--json", "/j", "\\j" }, paramLabel = "JSON", description = "output JSON format")
 	boolean JSON;
@@ -75,7 +73,7 @@ public class CmdLC implements Callable<Integer> {
 	@Override
 	public Integer call() throws FileNotFoundException, IOException {
 		
-
+		 int[] badLink = new int[1];       badLink[0] = 0;             //boolean badLink = false;
 
 		ArrayList<String> files = new ArrayList<String>();
 
@@ -101,7 +99,7 @@ public class CmdLC implements Callable<Integer> {
 					
 					//looping to test each url 
 					for(String url:links) {
-						urlTest(url);
+						urlTest(url, badLink);
 					}
 					
 					System.out.println(" ]");
@@ -110,7 +108,7 @@ public class CmdLC implements Callable<Integer> {
 				else {
 					//looping to test each url 
 					for(String url: links) {
-						urlTest(url);
+						urlTest(url, badLink);
 					}
 				}
 				
@@ -123,7 +121,7 @@ public class CmdLC implements Callable<Integer> {
 			
 		}
 
-        int exit_code = badLink ? 1 : 0;
+        int exit_code = badLink[0] == 1 ? 1 : 0;
         
 		return exit_code;
 	}
@@ -157,11 +155,10 @@ public class CmdLC implements Callable<Integer> {
 	}
 
 
-
 	
 
 	//check url is valid or invalid
-	public void urlTest(String link) throws MalformedURLException {
+	public void urlTest(String link, int[] badLink) throws MalformedURLException {
 
 		try {
 			URL url = new URL(link); 		
@@ -169,81 +166,34 @@ public class CmdLC implements Callable<Integer> {
 			//URL connect and response
 			HttpURLConnection huc = (HttpURLConnection) url.openConnection();
 			int responseCode = huc.getResponseCode();
-
-
+			
 			//	System.out.println(huc.getHeaderFields());
 
 			//set redirect
 			huc.setInstanceFollowRedirects(true);	
 			
 
-			//set URL status
-
-			if(responseCode == HttpURLConnection.HTTP_OK) {   //200				
-		 			                
-				if(JSON) 
-				   System.out.println("{url: '" + link + "' , status: '" + responseCode + "' }," );
-				else {
-
-				String str = "@|green " + "[" + responseCode + "]" + " GOOD     " + link + " |@";		
-				System.out.println(Ansi.AUTO.string(str));		
-				}
-
+			//print out with different format
+			if(JSON) 				   
+				   JsonPrint(link, responseCode);
+			else {
+				   colorPrint(link, responseCode);
+				   if(responseCode != HttpURLConnection.HTTP_OK) {   //200	
+					   badLink[0] = 1;
+				   }			
 			}
-
-			else if(responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == 307 || responseCode == 308)	 {   //301 Moved Permanently 									
-
-				// issue-6 redirection by Eunbee Kim
-				String redirectURL = huc.getHeaderField("Location");
-				urlTest(redirectURL);	
-				
-				if(JSON) 
-					   System.out.println("{url: '" + link + "' , status: '" + responseCode + "' }," );
-				else {
-				
-				String str = "@|yellow " + "[" + responseCode + "]" + " REDIRECT " + link + " |@";						
-				System.out.println(Ansi.AUTO.string(str));	
-				}
-
-							
-			}
-
-			else if(responseCode == HttpURLConnection.HTTP_NOT_FOUND || responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {   //400 HTTP_BAD_REQUEST , 404 HTTP_NOT_FOUND								
-
-				if(JSON) 
-					   System.out.println("{url: '" + link + "' , status: '" + responseCode + "' }," );
-				else {
-				
-				String str = "@|red " + "[" + responseCode + "]" + " BAD      "  + link + " |@";						
-
-				System.out.println(Ansi.AUTO.string(str));								
-				}
-                              badLink = true;
-			}
-
-			else {      //410 Gone	
-				if(JSON) 
-					   System.out.println("{url: '" + link + "' , status: '" + responseCode + "' }," );
-				else {
-				
-				String str = "@|237 " + "[" + responseCode + "]" + " UNKNOWN  " +  link + " |@";			
-				System.out.println(Ansi.AUTO.string(str));	
-
-				}
-                               badLink = true;
-			}
-
+			
 		}catch(MalformedURLException ex) {
 			
 			String str = "@|237 " + "      UNKNOWN  " +  link + " |@";						
 			System.out.println(Ansi.AUTO.string(str));	
-			badLink = true;
+		    	badLink[0] = 1;
 
 		}catch(IOException ex) {
 
 			String str = "@|237 " + "      UNKNOWN  " + link + " |@";						
 			System.out.println(Ansi.AUTO.string(str));		
-			badLink = true;
+		    	badLink[0] = 1;
 		}
 	}
 
@@ -277,5 +227,29 @@ public class CmdLC implements Callable<Integer> {
 		return files;
 	}
 
+	
+    //extract a JSONprint function
+    public void JsonPrint(String link, int responseCode){
+		System.out.println("{url: '" + link + "' , status: '" + responseCode + "' }," );
+	}
+    
+    
+    //extract a colorPrint function
+    public void colorPrint(String link, int responseCode){
+    	String str = null;
+    	if(responseCode == HttpURLConnection.HTTP_OK) {
+    	  str = "@|green " + "[" + responseCode + "]" + " GOOD     " + link + " |@";	
+		}
+    	else if(responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == 307 || responseCode == 308) {
+    	  str = "@|yellow " + "[" + responseCode + "]" + " REDIRECT " + link + " |@";	    		
+    	}
+    	else if(responseCode == HttpURLConnection.HTTP_NOT_FOUND || responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {
+    	  str  = "@|red " + "[" + responseCode + "]" + " BAD      "  + link + " |@";		  		
+    	}
+    	else {
+    	  str = "@|237 " + "[" + responseCode + "]" + " UNKNOWN  " +  link + " |@";	
+    	} 	
+    	  System.out.println(Ansi.AUTO.string(str));
+	}
 
 }
