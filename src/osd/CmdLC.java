@@ -293,19 +293,38 @@ public class CmdLC implements Callable<Integer> {
 	}
 
 
-	public void checkWebsite(String link, int[] badLink) throws MalformedURLException {
+	public void checkWebsite(String link, int[] badLink) throws MalformedURLException {		
+
 		String content = argUrl(link);
 
 		//save the urls from the file, avoiding duplication
 		HashSet<String> links = new HashSet<String> ();
 
-		//regular expression
-		String urlRegex = "(https?)://[-a-zA-Z0-9+&@#/%?=~_|,!:.;]*[-a-zA-Z0-9+@#/%=&_|]";
-		Pattern pattern = Pattern.compile(urlRegex);
-		Matcher matcher = pattern.matcher(content);
+		//check with local Telescope Server
+		String localServer = "http://localhost:3000/posts";
 
-		while(matcher.find()) {
-			links.add(matcher.group());
+		if(link.equals(localServer)) {
+
+			String[] json =  content.split("\"}");			
+
+			for(String s:json) {
+
+				if(s.indexOf("/", 1) > 0) {
+					String temp = "http://localhost:3000" + s.substring(s.indexOf("/"));
+					links.add(temp);
+				}	
+			}
+		}
+		else {		
+
+			//regular expression
+			String urlRegex = "(https?)://[-a-zA-Z0-9+&@#/%?=~_|,!:.;]*[-a-zA-Z0-9+@#/%=&_|]";
+			Pattern pattern = Pattern.compile(urlRegex);
+			Matcher matcher = pattern.matcher(content);
+
+			while(matcher.find()) {
+				links.add(matcher.group());
+			}
 		}
 
 		for(String url:links) {
