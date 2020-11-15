@@ -17,7 +17,7 @@ The LinkChecker-CmdLC requires Java 8 or higher.
 ### Tools
 
 #### Google Java Format
- The ![Google Java Format](https://github.com/google/google-java-format) is
+ The [Google Java Format](https://github.com/google/google-java-format) is
  a tool that reformats Java source code to comply with Google Java Style 
  - install google-java-format Eclipse plugin: 
  >  Help > Eclipse Marketplace > Search > Find Google-Java-Format
@@ -25,7 +25,7 @@ The LinkChecker-CmdLC requires Java 8 or higher.
  - run `./staticAnalysis.bat` before you commit 
  
 #### SpotBugs
- The ![SpotBugs](https://spotbugs.github.io/) is a tool that uses static analysis 
+ The [SpotBugs](https://spotbugs.github.io/) is a tool that uses static analysis 
  to look for bugs in Java code
  - install SpotBugs Eclipse plugin:
  >  Help > Eclipse Marketplace > Search > Find SpotBugs
