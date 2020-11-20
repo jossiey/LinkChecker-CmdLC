@@ -34,7 +34,7 @@ Download the CmdLC.jar file inside release0.1 folder
 | -V, --version | Print version information and exit |
 
 ## Contribution
-[CONTRIBUTING.md](https://github.com/jossiey/LinkChecker-CmdLC/blob/master/CONTRIBUTING.md)
+Want to contribute? Great! First, read [CONTRIBUTING.md](https://github.com/jossiey/LinkChecker-CmdLC/blob/master/CONTRIBUTING.md)
 
 ## Using the Library
 https://github.com/remkop/picocli
