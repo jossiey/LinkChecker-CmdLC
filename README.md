@@ -32,6 +32,8 @@ Download the CmdLC.jar file inside release0.1 folder
 | ---| ---|
 | -h, --help | Show this help message and exit |
 | -V, --version | Print version information and exit |
+| -j, -json | Choose to print out the result in JSON format|
+| -u, -url | Check a website URL directly |
 
 ## Contribution
 Want to contribute? Great! First, read [CONTRIBUTING.md](https://github.com/jossiey/LinkChecker-CmdLC/blob/master/CONTRIBUTING.md)
