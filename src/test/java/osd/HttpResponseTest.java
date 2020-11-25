@@ -66,7 +66,7 @@ public class HttpResponseTest
 	@Test
 	  public void testException() throws Exception {	  
 	 	
-	//	 CmdLC cmd =new CmdLC();
+	      CmdLC cmd =new CmdLC();
 		  assertEquals(0, cmdLC.urlTest(""));
 	    
 	  }
