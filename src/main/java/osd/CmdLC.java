@@ -139,9 +139,8 @@ public class CmdLC implements Callable<Integer> {
       }
 
     } catch (FileNotFoundException ex) {
-
+    	
     } catch (IOException ex) {
-
     }
     return links;
   }

@@ -5,10 +5,7 @@ import java.net.HttpURLConnection;
 import picocli.CommandLine.Help.Ansi;
 
 public class Print {
-   
-	public void print() {
-		System.out.println("test");
-	}
+ 
 	  // extract a jsonPrint function
 	  public void jsonPrint(String link, int responseCode) {
 	    System.out.println("{url: '" + link + "' , status: '" + responseCode + "' },");
