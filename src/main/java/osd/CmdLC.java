@@ -177,7 +177,7 @@ public class CmdLC implements Callable<Integer> {
 			print.jsonPrint(link, responseCode);
 		else {
 			print.colorPrint(link, responseCode);
-			if (responseCode != HttpURLConnection.HTTP_OK) { // 200
+			if (responseCode != HttpURLConnection.HTTP_OK) {
 				badLink[0] = 1;
 			}
 		}
