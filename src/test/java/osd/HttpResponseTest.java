@@ -38,8 +38,8 @@ public class HttpResponseTest {
 
     PowerMockito.when(cmdLC.urlTest(url)).thenReturn(200);
 
-    // CmdLC cmd =new CmdLC();
-    assertEquals(200, cmdLC.urlTest(url));
+     CmdLC cmd =new CmdLC();
+    assertEquals(200, cmd.urlTest(url));
   }
 
   @Test
@@ -56,6 +56,6 @@ public class HttpResponseTest {
   public void testException() throws Exception {
 
     CmdLC cmd = new CmdLC();
-    assertEquals(0, cmdLC.urlTest(""));
+    assertEquals(0, cmd.urlTest(""));
   }
 }
