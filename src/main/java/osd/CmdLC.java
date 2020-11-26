@@ -63,7 +63,7 @@ public class CmdLC implements Callable<Integer> {
     System.exit(exitCode);
   }
 
-  //@Override
+  // @Override
   public Integer call() throws FileNotFoundException, IOException {
 
     int[] badLink = new int[1];
@@ -96,14 +96,14 @@ public class CmdLC implements Callable<Integer> {
 
           // looping to test each url
           for (String url : links) {
-        	  printResult(url, badLink);//urlTest(url, badLink);
+            printResult(url, badLink); // urlTest(url, badLink);
           }
 
           System.out.println(" ]");
         } else {
           // looping to test each url
           for (String url : links) {
-        	  printResult(url, badLink);//urlTest(url, badLink);
+            printResult(url, badLink); // urlTest(url, badLink);
           }
         }
       }
@@ -139,7 +139,7 @@ public class CmdLC implements Callable<Integer> {
       }
 
     } catch (FileNotFoundException ex) {
-    	
+
     } catch (IOException ex) {
     }
     return links;
@@ -147,41 +147,40 @@ public class CmdLC implements Callable<Integer> {
 
   // check url is valid or invalid
   public int urlTest(String link) throws MalformedURLException {
-	 
-	  int responseCode = 0;
-		try {
-			URL url = new URL(link);
 
-			// URL connect and response
-			HttpURLConnection huc = (HttpURLConnection) url.openConnection();
-			responseCode = huc.getResponseCode();
+    int responseCode = 0;
+    try {
+      URL url = new URL(link);
 
-			// set redirect      //	System.out.println(huc.getHeaderFields());
-			huc.setInstanceFollowRedirects(true);    
-		} catch (MalformedURLException ex) {
-			responseCode =0;
-		} catch (IOException ex) {
-			responseCode =0;
-		}
-		return responseCode;
+      // URL connect and response
+      HttpURLConnection huc = (HttpURLConnection) url.openConnection();
+      responseCode = huc.getResponseCode();
+
+      // set redirect      //	System.out.println(huc.getHeaderFields());
+      huc.setInstanceFollowRedirects(true);
+    } catch (MalformedURLException ex) {
+      responseCode = 0;
+    } catch (IOException ex) {
+      responseCode = 0;
+    }
+    return responseCode;
   }
 
   public void printResult(String link, int[] badLink) throws MalformedURLException {
 
-		int responseCode = urlTest(link);
+    int responseCode = urlTest(link);
 
-		Print print = new Print();		
+    Print print = new Print();
 
-		// print out with different format
-		if (JSON) 
-			print.jsonPrint(link, responseCode);
-		else {
-			print.colorPrint(link, responseCode);
-			if (responseCode != HttpURLConnection.HTTP_OK) {
-				badLink[0] = 1;
-			}
-		}
-	}
+    // print out with different format
+    if (JSON) print.jsonPrint(link, responseCode);
+    else {
+      print.colorPrint(link, responseCode);
+      if (responseCode != HttpURLConnection.HTTP_OK) {
+        badLink[0] = 1;
+      }
+    }
+  }
   // recursively visit the directory/files and subfiles
   public ArrayList<String> visitFileRecursive(String path) throws IOException {
 
@@ -213,7 +212,6 @@ public class CmdLC implements Callable<Integer> {
 
     return files;
   }
-
 
   public String argUrl(String link) {
 
@@ -277,7 +275,7 @@ public class CmdLC implements Callable<Integer> {
     }
 
     for (String url : links) {
-    	printResult(url, badLink);//urlTest(url, badLink);
+      printResult(url, badLink); // urlTest(url, badLink);
     }
   }
 }
