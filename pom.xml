@@ -9,7 +9,7 @@
 	<packaging>jar</packaging>
 
 	<name>LinkChecker-CmdLC</name>
-	<description>A command-line tool checking broken URL</description>
+	<description>A command-line tool checking broken URLs</description>
 	<url>https://github.com/jossiey/LinkChecker-CmdLC</url>
 
 	<licenses>
@@ -27,7 +27,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/jossiey/LinkChecker-CmdLC.git</connection>
 		<developerConnection>scm:git:ssh://github.com:jossiey/LinkChecker-CmdLC.git</developerConnection>
-		<url>http://github.com/jossiey/LinkChecker-CmdLC/tree/master</url>
+		<url>http://github.com/jossiey/LinkChecker-CmdLC</url>
 	</scm>
 
 
