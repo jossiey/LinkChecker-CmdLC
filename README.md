@@ -13,7 +13,7 @@
 * Allowing to choose JSON format output by '-j', '-json', '/j', '\j' options in command line
 
 ## How it works
-Download the CmdLC.jar file inside release0.1 folder
+Download the LinkChecker-CmdLC.jar file from [Maven Central Repository](https://search.maven.org/search?q=g:com.github.jossiey)
 
 #### On Unix-based operating systems
  1. Make an alias first
@@ -25,7 +25,7 @@ Download the CmdLC.jar file inside release0.1 folder
  
 #### On Windows operating systems
    Run .jar directly
- > `java -jar CmdLC.jar <file1> <file2> ...`
+ > `java -jar LinkChecker-CmdLC.jar <file1> <file2> ...`
  
 ## Available Options
 | Options | Description |
